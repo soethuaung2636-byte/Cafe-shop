@@ -972,7 +972,6 @@ document.addEventListener(
 );
 
 
-/* Initialize immediately if DOM is already loaded */
 
 if (document.readyState !== "loading") {
 
@@ -984,3 +983,208 @@ if (document.readyState !== "loading") {
 
     closeMenu();
 }
+
+const emailModal = document.getElementById("email-modal");
+const emailModalTitle = document.getElementById("email-modal-title");
+const emailModalText = document.getElementById("email-modal-text");
+const emailModalForm = document.getElementById("email-modal-form");
+const modalEmail = document.getElementById("modal-email");
+const emailModalClose = document.getElementById("email-modal-close");
+
+let emailModalType = "";
+let selectedEvent = "";
+
+
+
+function openEmailModal(type, eventName = "") {
+
+    if (!emailModal) return;
+
+    emailModalType = type;
+    selectedEvent = eventName;
+
+    if (type === "subscribe") {
+
+        emailModalTitle.textContent = "Subscribe Now";
+
+        emailModalText.textContent =
+            "Enter your email address to join our subscription.";
+
+    }
+
+    if (type === "event") {
+
+        emailModalTitle.textContent = "Book Your Ticket";
+
+        emailModalText.textContent =
+            "Enter your email address to book this event.";
+
+    }
+
+    emailModal.classList.add("active");
+
+    emailModal.setAttribute("aria-hidden", "false");
+
+    setTimeout(function () {
+
+        if (modalEmail) {
+            modalEmail.focus();
+        }
+
+    }, 100);
+
+}
+
+
+
+function closeEmailModal() {
+
+    if (!emailModal) return;
+
+    emailModal.classList.remove("active");
+
+    emailModal.setAttribute("aria-hidden", "true");
+
+    if (emailModalForm) {
+        emailModalForm.reset();
+    }
+
+}
+
+
+
+document.querySelectorAll(".subscribe-btn").forEach(function (button) {
+
+    button.addEventListener("click", function (event) {
+
+        event.preventDefault();
+
+        openEmailModal("subscribe");
+
+    });
+
+});
+
+
+
+document.querySelectorAll(".event-booking-form").forEach(function (form) {
+
+    form.addEventListener("submit", function (event) {
+
+        event.preventDefault();
+
+        const eventName =
+            form.dataset.event || "Coffee Event";
+
+        openEmailModal("event", eventName);
+
+    });
+
+});
+
+
+
+if (emailModalForm) {
+
+    emailModalForm.addEventListener("submit", function (event) {
+
+        event.preventDefault();
+
+        const email =
+            modalEmail ? modalEmail.value.trim() : "";
+
+        if (!email) {
+            return;
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+
+            alert("Please enter a valid email address.");
+
+            return;
+        }
+
+
+        if (emailModalType === "subscribe") {
+
+            localStorage.setItem(
+                "subscriptionEmail",
+                email
+            );
+
+            alert(
+                "Subscription successful!\n\n" +
+                "Email: " + email
+            );
+
+        }
+
+
+        // =========================
+        // BOOK EVENT
+        // =========================
+
+        if (emailModalType === "event") {
+
+            localStorage.setItem(
+                "eventBooking",
+                JSON.stringify({
+
+                    event: selectedEvent,
+
+                    email: email
+
+                })
+            );
+
+            alert(
+                "Booking successful!\n\n" +
+                "Event: " + selectedEvent +
+                "\nEmail: " + email
+            );
+
+        }
+
+
+        closeEmailModal();
+
+    });
+
+}
+
+
+if (emailModalClose) {
+
+    emailModalClose.addEventListener(
+        "click",
+        closeEmailModal
+    );
+
+}
+
+
+if (emailModal) {
+
+    emailModal.addEventListener("click", function (event) {
+
+        if (event.target === emailModal) {
+
+            closeEmailModal();
+
+        }
+
+    });
+
+}
+
+
+
+document.addEventListener("keydown", function (event) {
+
+    if (event.key === "Escape") {
+
+        closeEmailModal();
+
+    }
+
+});
